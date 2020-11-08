@@ -6,29 +6,36 @@ In this project, we build and optimize an Azure ML pipeline using the Python SDK
 This model is then compared to an Azure AutoML run.
 
 ## Summary
-Nowhere in the project description was there any explanation what this data is, so I have to make an educated guess based on the column names and the file name (something that would never happen in real datascience project...). Because the datafile is called bankmarketing_train.csv, we can deduce that the data has something to do with finance. The column we are predicting based on the provided data cleaning script seems to contain values "yes" and "no". What these means is impossible to determine, so I'll just handle this as a binary classification problem where we are predicting something unknown based on random features. 
+Because the datafile is called bankmarketing_train.csv, we can deduce that the data has something to do with finance. The column we are predicting (the y value, or the dependent variable) based on the provided data cleaning script contains values "yes" and "no".  This is then converted to 1 for yes and 0 for no.
 
-Because we are dealing with a binary classification problem, a natural idea is to use logistic regression, which was done here.
+The predictors include wide range of features such as marital status (converted 1/0), whether the person has defaulted, whether they have housing, have loan and so on. 
+The predictors also include things like the education level of the participant. 
+
+Some of the variables, such as "contact" (whatever that might be) and "education" are one-hot-encoded using pandas get_dummies method. 
+The days and months are converted to numeric values. 
 
 ## Scikit-learn Pipeline
-I followed the project instructions, so there was no real pipelinehere. The features were not scaled or centered or anything such, they were just fed directly into the logistic regression (after of course being converted to numeric values from strings).
 
-I chose the randomparametersampling because it was pretty much the only only option, there are no real benefits for it over gridsearch except maybe it is slightly faster.
+For the scikit-learn pipeline, we preprocess the data with steps I described in the summary section. We then use a logistic regression for the binary classification task.
+Once the data is cleaned, it is split into testing and training sets. The Logistic regression take in as hyperparamter C which is the inverser of the regularization strength. We also use as hyperparameter the maximum number of iterations. As the scoring metrics we use accuracy
 
-In theory the early stopping might make the runs go faster. In this artificial experiment it was just waste of time to implement.
+I selected randomparamtersampling to sample the hyperparameters as this is faster than the gridsearch. 
+
+I selected BanditPolicy as the early stopping policy, a it allows me to specify, with the slack-amount parameter, runs that are not good compared to the best run so far.
 
 ## AutoML
-The autoML generated something called VotingEnsemble (according to the Azure ML Studio GUI), so apparently somekind of ensemble method performed best, achieving over 95% accuracy  (weighted_accuracy 0.9538785580226481, AUC_macro 0.9430183393274798.
-norm_macro_recall 0.5266777897652332)
+Best model found by AutoML is actually an Voting Ensemble of the of the best models that uses several models and bases its prediction on the avaraged vote of these models. The model achieved 91.6% accuracy. Looking at the feature importances in Machine Learning Studio, I can see that duration, emp.var.rate and nr.employed were the 3 most important features
+
 ## Pipeline comparison
-The logistic regression achieved around 90.8% accuracy. Considering that we had around 40 features it makes sense that the ensemble method outperformed the basic logistic regression.
+We are compare two pipelines, one where a scikit-learn based logistic regression model has its hyperparameters (C and max-iter) tuned by the hyperdrive service, and another pipeline where we use Azure AutoML to automatically compare multiple machine learning models.
+The logistic regression achieved around 91.3% accuracy. Considering that we had around 40 features it makes sense that the ensemble method outperformed the basic logistic regression. The voting ensemble only achiveed 91.6% accuracy, so not really substantial improvement over the logistic regression. Howerver, the other metrics, such as AUC weighted (at 0.95755) were nice for the AutoML.
 
 ## Future work
-Feature preprocessing might help the performance, because that is why it is done...
+Proper feature pre-processing (the current clean_data) would probably help the performance. For example normalizing the features. Also, using some more complicated scikit-learn model, such as random forest or gradient boosting, would probably perform much better than logistic regression. Also, using cross-validation for the scikit-learn model would have been a good idea to reduce over-fitting (AutoML handles cross-validation automatically.)
 
 ## Proof of cluster clean up
 I did this on my personal Azure account.
-
+The jupyter notebook has output of the deletion operation.
 
 ```
 
