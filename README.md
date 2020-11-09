@@ -24,7 +24,7 @@ I selected randomparamtersampling to sample the hyperparameters as this is faste
 I selected BanditPolicy as the early stopping policy, a it allows me to specify, with the slack-amount parameter, runs that are not good compared to the best run so far.
 
 ## AutoML
-Best model found by AutoML is actually an Voting Ensemble of the of the best models that uses several models and bases its prediction on the avaraged vote of these models. The model achieved 91.6% accuracy. Looking at the feature importances in Machine Learning Studio, I can see that duration, emp.var.rate and nr.employed were the 3 most important features
+Best model found by AutoML is actually an Voting Ensemble of the of the best models that uses several models and bases its prediction on the avaraged vote of these models. The model achieved 91.6% accuracy. Looking at the feature importances in Machine Learning Studio, I can see that duration, emp.var.rate and nr.employed were the 3 most important features. Looking at the AutoML get_details() output I can see that the best run had such parameters as n_estimators = 10, min_samples_split=0.1505, n_jobs=1, random_state=None
 
 ## Pipeline comparison
 We are compare two pipelines, one where a scikit-learn based logistic regression model has its hyperparameters (C and max-iter) tuned by the hyperdrive service, and another pipeline where we use Azure AutoML to automatically compare multiple machine learning models.
